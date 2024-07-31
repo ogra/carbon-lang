@@ -8,6 +8,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_filegroup", "pkg_files", "pkg_mklink", "strip_prefix")
 load("pkg_helpers.bzl", "pkg_naming_variables", "pkg_tar_and_test")
 load("symlink_filegroup.bzl", "symlink_filegroup")
+load("@bazel_tools//tools/platforms:platforms.bzl", "host_platform")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -205,11 +206,36 @@ pkg_naming_variables(
 # We build both a compressed and uncompressed tar file with the same code here.
 # This lets us use the tar file in testing as it is fast to create, but ship the
 # compressed version as a release.
+
+config_setting(
+    name = "macos_amd64",
+    constraint_values = [
+        "@bazel_tools//platforms:osx",
+        "@bazel_tools//platforms:x86_64",
+    ],
+)
+
+config_setting(
+    name = "macos_arm64",
+    constraint_values = [
+        "@bazel_tools//platforms:osx",
+        "@bazel_tools//platforms:arm64",
+    ],
+)
+
 pkg_tar_and_test(
     srcs = [":packaging_files"],
     name_base = "carbon_toolchain",
-    package_dir = "carbon_toolchain-$(version)",
-    package_file_name_base = "carbon_toolchain-$(version)",
+    package_dir = select({
+        ":macos_amd64": "carbon_toolchain-$(version)-macos-amd64",
+        ":macos_arm64": "carbon_toolchain-$(version)-macos-arm64",
+        "//conditions:default": "carbon_toolchain-$(version)",
+    }),
+    package_file_name_base = select({
+        ":macos_amd64": "carbon_toolchain-$(version)-macos-amd64",
+        ":macos_arm64": "carbon_toolchain-$(version)-macos-arm64",
+        "//conditions:default": "carbon_toolchain-$(version)",
+    }),
     package_variables = ":packaging_variables",
     stamp = -1,  # Allow `--stamp` builds to produce file timestamps.
     test_data = [

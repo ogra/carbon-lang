@@ -82,6 +82,18 @@ jobs:
             | cut -d' ' -f5 | cut -d'+' -f1)
           echo "release_version=$VERSION" >> $GITHUB_ENV
 
+      - name: Determine platform-specific file name
+        id: platform
+        run: |
+          if [[ "${{ matrix.arch }}" == "amd64" ]]; then
+            echo "PLATFORM_SUFFIX=macos-amd64" >> $GITHUB_ENV
+          elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            echo "PLATFORM_SUFFIX=macos-arm64" >> $GITHUB_ENV
+          else
+            echo "Unsupported architecture: ${{ matrix.arch }}"
+            exit 1
+          fi
+      
       - name: Create the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,4 +103,4 @@ jobs:
             --generate-notes \
             --prerelease \
             v${{ env.release_version }} \
-            "bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}.tar.gz"
+            "bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}.tar.gz"
