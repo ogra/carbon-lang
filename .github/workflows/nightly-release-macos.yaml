@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64]
     
     steps:
       - name: Harden Runner
