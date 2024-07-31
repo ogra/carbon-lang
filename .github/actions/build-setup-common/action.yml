@@ -58,8 +58,8 @@ runs:
       run: |
         cat >user.bazelrc <<EOF
         # Enable remote cache for our CI but minimize downloads.
-        build --remote_cache=https://storage.googleapis.com/carbon-builds-github-v${CACHE_VERSION}
-        build --remote_download_minimal
+        # build --remote_cache=https://storage.googleapis.com/carbon-builds-github-v${CACHE_VERSION}
+        # build --remote_download_minimal
 
         # We import a special key into every action in order to key the Bazel
         # remote cache in a way that avoids collisions between different
@@ -71,9 +71,9 @@ runs:
         # do need to capture any differences between GitHub runner OSes that
         # don't impact the Bazel configuration to avoid collisions between
         # those.
-        build --action_env=BAZEL_REMOTE_CACHE_KEY=github-action-${{ inputs.matrix_runner }}
+        # build --action_env=BAZEL_REMOTE_CACHE_KEY=github-action-${{ inputs.matrix_runner }}
 
-        build ${{ inputs.remote_cache_upload }}
+        # build ${{ inputs.remote_cache_upload }}
 
         # Set an artificially high jobs count. This flag controls the number
         # of concurrency Bazel itself uses, which is essential for actions
