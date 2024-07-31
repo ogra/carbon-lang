@@ -8,7 +8,6 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_filegroup", "pkg_files", "pkg_mklink", "strip_prefix")
 load("pkg_helpers.bzl", "pkg_naming_variables", "pkg_tar_and_test")
 load("symlink_filegroup.bzl", "symlink_filegroup")
-load("@@bazel_tools//tools:platforms/platforms.bzl", "host_platform")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -210,16 +209,16 @@ pkg_naming_variables(
 config_setting(
     name = "macos_amd64",
     constraint_values = [
-        "@bazel_tools//platforms:osx",
-        "@bazel_tools//platforms:x86_64",
+        "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
     ],
 )
 
 config_setting(
     name = "macos_arm64",
     constraint_values = [
-        "@bazel_tools//platforms:osx",
-        "@bazel_tools//platforms:arm64",
+        "@platforms//os:osx",
+        "@platforms//cpu:arm64",
     ],
 )
 
