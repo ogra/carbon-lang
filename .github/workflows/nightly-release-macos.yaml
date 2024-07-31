@@ -102,9 +102,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create \
-            --title "Nightly build ${{ env.nightly_date }}" \
-            --generate-notes \
-            --prerelease \
-            v${{ env.release_version }} \
-            "bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}.tar.gz"
+          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}.tar.gz"
+          if [[ -f "$FILE" ]]; then
+            gh release create \
+              --title "Nightly build ${{ env.nightly_date }}" \
+              --generate-notes \
+              --prerelease \
+              v${{ env.release_version }} \
+              "$FILE"
+          fi
