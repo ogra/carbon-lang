@@ -21,7 +21,7 @@
 # - Build artifacts for all the different OSes we have GitHub runners for rather
 #   than just x86 Linux.
 
-name: Nightly Release
+name: Nightly Release for macOS
 
 on:
   schedule:
