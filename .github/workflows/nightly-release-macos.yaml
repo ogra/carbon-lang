@@ -25,7 +25,7 @@ name: Nightly Release for macOS
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 9 * * *'
   # Enable manual runs for testing or manually (re-)creating a nightly release.
   workflow_dispatch:
 
