@@ -102,7 +102,7 @@ jobs:
         run: |
           FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}"
           if [[ -f "${FILE}.tar.gz" ]]; then
-            sha256sum "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
+            shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
       
       - name: Create the release
