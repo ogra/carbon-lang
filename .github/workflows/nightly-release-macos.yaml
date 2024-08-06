@@ -98,16 +98,24 @@ jobs:
             exit 1
           fi
       
+      - name: Calculate SHA256 hash
+        run: |
+          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}"
+          if [[ -f "${FILE}.tar.gz" ]]; then
+            sha256sum "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
+          fi
+      
       - name: Create the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}.tar.gz"
-          if [[ -f "$FILE" ]]; then
+          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}"
+          if [[ -f "${FILE}.tar.gz" ]] && [[ -f "${FILE}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ env.nightly_date }}" \
               --generate-notes \
               --prerelease \
               v${{ env.release_version }} \
-              "$FILE"
+              "${FILE}.tar.gz" \
+              "${FILE}.sha256"
           fi
