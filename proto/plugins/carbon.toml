@@ -1,0 +1,24 @@
+name = "carbon"
+type = "cli"
+
+[platform.macos]
+archive-prefix = "carbon_toolchain-{version}-{os}-{arch}"
+exe-path = "bin/carbon"
+checksum-file = "carbon_toolchain-{version}-{os}-{arch}.sha256"
+download-file = "carbon_toolchain-{version}-{os}-{arch}.tar.gz"
+
+[install]
+checksum-url = "https://github.com/ogra/carbon-lang/releases/download/v{version}/{checksum_file}"
+download-url = "https://github.com/ogra/carbon-lang/releases/download/v{version}/{download_file}"
+
+[install.arch]
+x86_64 = "amd64"
+
+[install.primary]
+exe-path = "bin/carbon"
+
+[packages]
+globals-lookup-dirs = ["$CARBON_HOME/bin", "$HOME/.carbon/bin"]
+
+[resolve]
+git-url = "https://github.com/ogra/carbon-lang"
