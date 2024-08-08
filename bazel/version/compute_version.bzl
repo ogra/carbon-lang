@@ -45,14 +45,14 @@ def compute_version(ctx):
             number = pre_release_numbers[pre_release]
             if number < 0:
                 fail("Must provide a non-negative {} number when building that pre-release.".format(pre_release))
-            version += "-pre.{0}.{1}".format(pre_release, number)
+            version += "-{0}.{1}".format(pre_release, number)
         elif pre_release == "nightly":
             date = ctx.attr._nightly_date_flag[BuildSettingInfo].value
             _validate_nightly_date(date)
             # Convert date from YYYY.mm.dd to YYYYmmdd
             date_components = date.split('.')
             formatted_date = ''.join(date_components)
-            version += "+nightly{}".format(formatted_date)
+            version += "-pre.0+nightly{}".format(formatted_date)
         elif pre_release == "dev":
             version += "-0.dev"
         else:
