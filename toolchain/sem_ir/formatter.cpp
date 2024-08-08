@@ -233,7 +233,7 @@ class FormatterImpl {
 
     llvm::SaveAndRestore impl_scope(scope_, inst_namer_->GetScopeFor(id));
 
-    if (impl_info.scope_id.is_valid()) {
+    if (impl_info.is_defined()) {
       out_ << ' ';
       OpenBrace();
       FormatCodeBlock(impl_info.body_block_id);
@@ -242,7 +242,9 @@ class FormatterImpl {
       // always list the witness in this section.
       IndentLabel();
       out_ << "!members:\n";
-      FormatNameScope(impl_info.scope_id);
+      if (impl_info.scope_id.is_valid()) {
+        FormatNameScope(impl_info.scope_id);
+      }
 
       Indent();
       out_ << "witness = ";
@@ -550,7 +552,8 @@ class FormatterImpl {
     out_ << InstT::Kind.ir_name();
     pending_constant_value_ = sem_ir_.constant_values().Get(inst_id);
     pending_constant_value_is_self_ =
-        sem_ir_.constant_values().GetInstId(pending_constant_value_) == inst_id;
+        sem_ir_.constant_values().GetInstIdIfValid(pending_constant_value_) ==
+        inst_id;
     FormatInstRHS(inst);
     FormatPendingConstantValue(AddSpace::Before);
     out_ << "\n";
