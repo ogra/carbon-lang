@@ -83,7 +83,7 @@ jobs:
           # Now stash it in a variable and export it.
           VERSION=$( \
             ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
-            | cut -d' ' -f5 | cut -d'+' -f1)
+            | cut -d' ' -f5 | cut -d'+' -f1,2)
           echo "release_version=$VERSION" >> $GITHUB_ENV
 
       - name: Determine platform-specific file name
