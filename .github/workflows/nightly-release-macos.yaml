@@ -33,18 +33,8 @@ permissions:
   contents: write # For creating and uploading to releases.
 
 jobs:
-  release:
-    strategy:
-      matrix:
-        os: [macos-12, macos-14]
-        arch: [amd64, arm64]
-        exclude:
-          - os: macos-12
-            arch: arm64
-          - os: macos-14
-            arch: amd64
+  common-steps:
     runs-on: ${{ matrix.os }}
-    
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -53,23 +43,18 @@ jobs:
 
       - name: Checkout branch
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-      # - name: Set up remote cache access
-        # env:
-          # REMOTE_CACHE_KEY: ${{ secrets.CARBON_BUILDS_GITHUB }}
-        # run: |
-          # echo "$REMOTE_CACHE_KEY" | base64 -d > $HOME/remote_cache_key.json
-          # echo "remote_cache_upload=--google_credentials=$HOME/remote_cache_key.json" \
-              # >> $GITHUB_ENV
-
-      - uses: ./.github/actions/build-setup-common
-        with:
-          matrix_runner: macos-12
-          # remote_cache_upload: ${{ env.remote_cache_upload }}
-
+      
       - name: Get nightly date
         run: |
           echo "nightly_date=$(date '+%Y.%m.%d')" >> $GITHUB_ENV
+
+  build-amd64:
+    runs-on: macos-12
+    needs: common-steps
+    steps:
+      - uses: ./.github/actions/build-setup-common
+        with:
+          matrix_runner: ${{ matrix.os }}
 
       - name: Build release
         run: |
@@ -90,38 +75,69 @@ jobs:
           VERSION=$( \
             ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
             | cut -d' ' -f5 | cut -d'+' -f1,2)
-          echo "release_version=$VERSION" >> $GITHUB_ENV
-
-      - name: Determine platform-specific file name
-        id: platform
-        run: |
-          if [[ "${{ matrix.os }}" == "macos-12" ]] && [[ "${{ matrix.arch }}" == "amd64" ]]; then
-            echo "PLATFORM_SUFFIX=macos-amd64" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "macos-14" ]] && [[ "${{ matrix.arch }}" == "arm64" ]]; then
-            echo "PLATFORM_SUFFIX=macos-arm64" >> $GITHUB_ENV
-          else
-            echo "Unsupported architecture: ${{ matrix.arch }}"
-            exit 1
-          fi
+          echo "release_version_macos12=$VERSION" >> $GITHUB_ENV
       
       - name: Calculate SHA256 hash
         run: |
-          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}"
+          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64"
           if [[ -f "${FILE}.tar.gz" ]]; then
             shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
+
+  build-arm64:
+    runs-on: macos-14
+    needs: common-steps
+    steps:
+      - uses: ./.github/actions/build-setup-common
+        with:
+          matrix_runner: ${{ matrix.os }}
+
+      - name: Build release
+        run: |
+          ./scripts/run_bazel.py \
+            --attempts=5 --jobs-on-last-attempt=4 \
+            test -c opt --remote_download_toplevel \
+            --pre_release=nightly --nightly_date=${{ env.nightly_date }} \
+            //toolchain/install:prefix_root/bin/carbon \
+            //toolchain/install:carbon_toolchain_tar_gz_rule \
+            //toolchain/install:carbon_toolchain_tar_gz_test
+
+      - name: Extract the release version
+        run: |
+          # Make sure we can run the toolchain to get the version.
+          ./bazel-bin/toolchain/install/prefix_root/bin/carbon version
+
+          # Now stash it in a variable and export it.
+          VERSION=$( \
+            ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
+            | cut -d' ' -f5 | cut -d'+' -f1,2)
+          echo "release_version_macos14=$VERSION" >> $GITHUB_ENV
       
+      - name: Calculate SHA256 hash
+        run: |
+          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64"
+          if [[ -f "${FILE}.tar.gz" ]]; then
+            shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
+          fi
+
+  release:
+    runs-on: macos-14
+    needs: [build-amd64, build-arm64]
+    steps:
       - name: Create the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FILE="bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version }}-${{ env.PLATFORM_SUFFIX }}"
-          if [[ -f "${FILE}.tar.gz" ]] && [[ -f "${FILE}.sha256" ]]; then
+          FILE_AMD64="bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
+          FILE_ARM64="bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
+          if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ env.nightly_date }}" \
               --generate-notes \
               --prerelease \
-              v${{ env.release_version }} \
-              "${FILE}.tar.gz" \
-              "${FILE}.sha256"
+              v${{ needs.build-amd64.outputs.release_version }} \
+              "${FILE_AMD64}.tar.gz" \
+              "${FILE_AMD64}.sha256" \
+              "${FILE_ARM64}.tar.gz" \
+              "${FILE_ARM64}.sha256"
           fi
