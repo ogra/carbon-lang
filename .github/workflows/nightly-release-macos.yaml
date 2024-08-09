@@ -35,6 +35,8 @@ permissions:
 jobs:
   build-amd64:
     runs-on: macos-12
+    outputs:
+      release_version_macos12: ${{ steps.extract_release.outputs.release_version_macos12 }}
     steps:
       - name: Get nightly date
         run: |
@@ -63,6 +65,7 @@ jobs:
             //toolchain/install:carbon_toolchain_tar_gz_test
 
       - name: Extract the release version
+        id: extract_release
         run: |
           # Make sure we can run the toolchain to get the version.
           ./bazel-bin/toolchain/install/prefix_root/bin/carbon version
@@ -71,6 +74,7 @@ jobs:
           VERSION=$( \
             ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
             | cut -d' ' -f5 | cut -d'+' -f1,2)
+          echo "::set-output name=release_version_macos12::${VERSION}"
           echo "release_version_macos12=$VERSION" >> $GITHUB_ENV
       
       - name: Calculate SHA256 hash
@@ -81,7 +85,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
@@ -89,6 +93,8 @@ jobs:
 
   build-arm64:
     runs-on: macos-14
+    outputs:
+      release_version_macos14: ${{ steps.extract_release.outputs.release_version_macos14 }}
     steps:
       - name: Get nightly date
         run: |
@@ -117,6 +123,7 @@ jobs:
             //toolchain/install:carbon_toolchain_tar_gz_test
 
       - name: Extract the release version
+        id: extract_release
         run: |
           # Make sure we can run the toolchain to get the version.
           ./bazel-bin/toolchain/install/prefix_root/bin/carbon version
@@ -125,6 +132,7 @@ jobs:
           VERSION=$( \
             ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
             | cut -d' ' -f5 | cut -d'+' -f1,2)
+          echo "::set-output name=release_version_macos14::${VERSION}"
           echo "release_version_macos14=$VERSION" >> $GITHUB_ENV
       
       - name: Calculate SHA256 hash
@@ -135,7 +143,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
@@ -146,16 +154,14 @@ jobs:
     needs: [build-amd64, build-arm64]
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: ./artifacts
+        uses: actions/download-artifact@v4
 
       - name: Create the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FILE_AMD64="./artifacts/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
-          FILE_ARM64="./artifacts/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
+          FILE_AMD64="./artifact/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
+          FILE_ARM64="./artifact/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ env.nightly_date }}" \
