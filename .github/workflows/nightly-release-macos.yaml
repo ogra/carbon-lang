@@ -87,6 +87,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
+          name: artifact-amd64
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.sha256
@@ -145,6 +146,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
+          name: artifact-arm64
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.sha256
