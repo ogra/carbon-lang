@@ -80,6 +80,14 @@ jobs:
             shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64
+          path: |
+            bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
+            bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.sha256
+
   build-arm64:
     runs-on: macos-14
     steps:
@@ -127,22 +135,42 @@ jobs:
             shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64
+          path: |
+            bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
+            bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.sha256
+
   release:
     runs-on: macos-14
     needs: [build-amd64, build-arm64]
     steps:
+      - name: Download amd64 artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64
+          path: ./artifacts
+
+      - name: Download arm64 artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64
+          path: ./artifacts
+
       - name: Create the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FILE_AMD64="bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
-          FILE_ARM64="bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
+          FILE_AMD64="./artifacts/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
+          FILE_ARM64="./artifacts/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ env.nightly_date }}" \
               --generate-notes \
               --prerelease \
-              v${{ needs.build-amd64.outputs.release_version }} \
+              v${{ needs.build-arm64.outputs.release_version_macos14 }} \
               "${FILE_AMD64}.tar.gz" \
               "${FILE_AMD64}.sha256" \
               "${FILE_ARM64}.tar.gz" \
