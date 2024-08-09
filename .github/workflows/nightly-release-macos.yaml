@@ -33,17 +33,13 @@ permissions:
   contents: write # For creating and uploading to releases.
 
 jobs:
-  common-steps:
-    runs-on: macos-14
+  build-amd64:
+    runs-on: macos-12
     steps:
       - name: Get nightly date
         run: |
           echo "nightly_date=$(date '+%Y.%m.%d')" >> $GITHUB_ENV
 
-  build-amd64:
-    runs-on: macos-12
-    needs: common-steps
-    steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
@@ -86,8 +82,11 @@ jobs:
 
   build-arm64:
     runs-on: macos-14
-    needs: common-steps
     steps:
+      - name: Get nightly date
+        run: |
+          echo "nightly_date=$(date '+%Y.%m.%d')" >> $GITHUB_ENV
+
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
