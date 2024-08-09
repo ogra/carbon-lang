@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   common-steps:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-14
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
