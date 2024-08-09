@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: ./.github/actions/build-setup-common
         with:
-          matrix_runner: ${{ matrix.os }}
+          matrix_runner: macos-12
 
       - name: Build release
         run: |
@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: ./.github/actions/build-setup-common
         with:
-          matrix_runner: ${{ matrix.os }}
+          matrix_runner: macos-14
 
       - name: Build release
         run: |
