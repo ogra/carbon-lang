@@ -83,7 +83,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.sha256
@@ -138,7 +137,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.sha256
@@ -147,16 +145,9 @@ jobs:
     runs-on: macos-14
     needs: [build-amd64, build-arm64]
     steps:
-      - name: Download amd64 artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v2
         with:
-          name: carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64
-          path: ./artifacts
-
-      - name: Download arm64 artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64
           path: ./artifacts
 
       - name: Create the release
