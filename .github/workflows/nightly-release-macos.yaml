@@ -162,8 +162,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FILE_AMD64="./artifact/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
-          FILE_ARM64="./artifact/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
+          FILE_AMD64="./artifact-amd64/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
+          FILE_ARM64="./artifact-arm64/bazel-bin/toolchain/install/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ env.nightly_date }}" \
