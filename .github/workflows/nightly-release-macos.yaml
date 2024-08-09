@@ -36,14 +36,6 @@ jobs:
   common-steps:
     runs-on: macos-14
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
-        with:
-          egress-policy: audit
-
-      - name: Checkout branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      
       - name: Get nightly date
         run: |
           echo "nightly_date=$(date '+%Y.%m.%d')" >> $GITHUB_ENV
@@ -52,6 +44,14 @@ jobs:
     runs-on: macos-12
     needs: common-steps
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      
       - uses: ./.github/actions/build-setup-common
         with:
           matrix_runner: macos-12
@@ -88,6 +88,14 @@ jobs:
     runs-on: macos-14
     needs: common-steps
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      
       - uses: ./.github/actions/build-setup-common
         with:
           matrix_runner: macos-14
