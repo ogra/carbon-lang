@@ -34,10 +34,16 @@ permissions:
 
 jobs:
   release:
-    runs-on: macos-12
     strategy:
       matrix:
-        arch: [amd64]
+        os: [macos-12, macos-14]
+        arch: [amd64, arm64]
+        exclude:
+          - os: macos-12
+            arch: arm64
+          - os: macos-14
+            arch: amd64
+    runs-on: ${{ matrix.os }}
     
     steps:
       - name: Harden Runner
@@ -89,9 +95,9 @@ jobs:
       - name: Determine platform-specific file name
         id: platform
         run: |
-          if [[ "${{ matrix.arch }}" == "amd64" ]]; then
+          if [[ "${{ matrix.os }}" == "macos-12" ]] && [[ "${{ matrix.arch }}" == "amd64" ]]; then
             echo "PLATFORM_SUFFIX=macos-amd64" >> $GITHUB_ENV
-          elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
+          elif [[ "${{ matrix.os }}" == "macos-14" ]] && [[ "${{ matrix.arch }}" == "arm64" ]]; then
             echo "PLATFORM_SUFFIX=macos-arm64" >> $GITHUB_ENV
           else
             echo "Unsupported architecture: ${{ matrix.arch }}"
