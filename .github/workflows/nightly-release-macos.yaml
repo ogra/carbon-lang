@@ -169,7 +169,7 @@ jobs:
           FILE_ARM64="./artifact-arm64/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
-              --title "Nightly build ${{ env.nightly_date }}" \
+              --title "Nightly build ${{ needs.build-arm64.outputs.release_version_macos14 }}" \
               --generate-notes \
               --prerelease \
               v${{ needs.build-arm64.outputs.release_version_macos14 }} \
