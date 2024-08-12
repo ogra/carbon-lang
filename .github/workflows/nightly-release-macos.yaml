@@ -92,6 +92,10 @@ jobs:
           if [[ -f "${FILE}.tar.gz" ]]; then
             shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
+          VSCODE_EXTENSION_FILE="utils/vscode/out/carbon.vsix"
+          if [[ -f "${VSCODE_EXTENSION_FILE}" ]]; then
+            shasum -a 256 "${VSCODE_EXTENSION_FILE}" | awk '{ print $1 }' > "${VSCODE_EXTENSION_FILE}.sha256"
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -101,6 +105,7 @@ jobs:
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.sha256
             utils/vscode/out/carbon.vsix
+            utils/vscode/out/carbon.vsix.sha256
 
   build-arm64:
     runs-on: macos-14
@@ -161,10 +166,6 @@ jobs:
           if [[ -f "${FILE}.tar.gz" ]]; then
             shasum -a 256 "${FILE}.tar.gz" | awk '{ print $1 }' > "${FILE}.sha256"
           fi
-          LANGUAGE_SERVER_FILE="bazel-bin/language_server/language_server"
-          if [[ -f "${LANGUAGE_SERVER_FILE}" ]]; then
-            shasum -a 256 "${LANGUAGE_SERVER_FILE}" | awk '{ print $1 }' > "${LANGUAGE_SERVER_FILE}.sha256"
-          fi
           VSCODE_EXTENSION_FILE="utils/vscode/out/carbon.vsix"
           if [[ -f "${VSCODE_EXTENSION_FILE}" ]]; then
             shasum -a 256 "${VSCODE_EXTENSION_FILE}" | awk '{ print $1 }' > "${VSCODE_EXTENSION_FILE}.sha256"
@@ -177,8 +178,6 @@ jobs:
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.sha256
-            bazel-bin/language_server/language_server
-            bazel-bin/language_server/language_server.sha256
             utils/vscode/out/carbon.vsix
             utils/vscode/out/carbon.vsix.sha256
 
@@ -194,10 +193,6 @@ jobs:
       
       - name: Rename VS Code extension artifacts
         run: |
-          mv ./artifact-amd64/language_server ./artifact-amd64/language_server-amd64
-          mv ./artifact-amd64/language_server.sha256 ./artifact-amd64/language_server-amd64.sha256
-          mv ./artifact-arm64/language_server ./artifact-arm64/language_server-arm64
-          mv ./artifact-arm64/language_server.sha256 ./artifact-arm64/language_server-arm64.sha256
           mv ./artifact-amd64/carbon.vsix ./artifact-amd64/carbon-amd64.vsix
           mv ./artifact-amd64/carbon.vsix.sha256 ./artifact-amd64/carbon-amd64.vsix.sha256
           mv ./artifact-arm64/carbon.vsix ./artifact-arm64/carbon-arm64.vsix
@@ -209,8 +204,6 @@ jobs:
         run: |
           FILE_AMD64="./artifact-amd64/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
           FILE_ARM64="./artifact-arm64/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
-          LANGUAGE_SERVER_AMD64="./artifact-amd64/language_server-amd64"
-          LANGUAGE_SERVER_ARM64="./artifact-arm64/language_server-arm64"
           VSCODE_EXTENSION_AMD64="./artifact-amd64/carbon-amd64.vsix"
           VSCODE_EXTENSION_ARM64="./artifact-arm64/carbon-arm64.vsix"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
@@ -223,10 +216,6 @@ jobs:
               "${FILE_AMD64}.sha256" \
               "${FILE_ARM64}.tar.gz" \
               "${FILE_ARM64}.sha256" \
-              "${LANGUAGE_SERVER_AMD64}" \
-              "${LANGUAGE_SERVER_AMD64}.sha256" \
-              "${LANGUAGE_SERVER_ARM64}" \
-              "${LANGUAGE_SERVER_ARM64}.sha256" \
               "${VSCODE_EXTENSION_AMD64}" \
               "${VSCODE_EXTENSION_AMD64}.sha256" \
               "${VSCODE_EXTENSION_ARM64}" \
