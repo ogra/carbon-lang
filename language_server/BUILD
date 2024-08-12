@@ -8,6 +8,7 @@ package(default_visibility = [
     "//bazel/check_deps:__pkg__",
     "//installers:__subpackages__",
     "//language_server:__subpackages__",
+    "//toolchain/install:__subpackages__",
 ])
 
 cc_binary(
