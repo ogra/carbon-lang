@@ -184,6 +184,7 @@ pkg_files(
     srcs = [
         "prefix_root/bin/carbon",
         "prefix_root/lib/carbon/llvm/bin/lld",
+        "prefix_root/lib/carbon/language_server/bin/language_server",
     ],
     attributes = pkg_attributes(mode = "0755"),
     strip_prefix = strip_prefix.from_pkg("prefix_root"),
@@ -202,6 +203,15 @@ pkg_files(
     for bin_name in lld_bin_names
 ]
 
+[
+    pkg_mklink(
+        name = "packaging_link_language_server_alias_" + bin_name,
+        link_name = "lib/carbon/language_server/bin/" + bin_name,
+        target = "language_server",
+    )
+    for bin_name in language_server_bin_names
+]
+
 pkg_files(
     name = "packaging_data_files",
     srcs = [
@@ -218,6 +228,9 @@ pkg_filegroup(
     ] + [
         ":packaging_link_lld_alias_" + bin_name
         for bin_name in lld_bin_names
+    ] + [
+        ":packaging_link_language_server_alias_" + bin_name
+        for bin_name in language_server_bin_names
     ],
 )
 
