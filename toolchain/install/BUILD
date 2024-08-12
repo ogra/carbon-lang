@@ -96,8 +96,9 @@ filegroup(
 )
 
 filegroup(
-    name = "language_server_data",
+    name = "language_server_link_data",
     srcs = [
+        "prefix_root/lib/carbon/language_server/bin/language_server",
         ":install_marker",
     ] + [
         "prefix_root/lib/carbon/language_server/bin/" + bin_name
@@ -114,7 +115,7 @@ filegroup(
         ":core_data",
         ":install_marker",
         ":llvm_link_data",
-        ":language_server_data",
+        ":language_server_link_data",
     ],
 )
 
