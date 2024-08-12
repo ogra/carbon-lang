@@ -187,11 +187,21 @@ pkg_files(
     strip_prefix = strip_prefix.from_pkg("prefix_root"),
 )
 
+pkg_files(
+    name = "language_server",
+    srcs = [
+        "bazel-bin/language_server/language_server",
+    ],
+    attributes = pkg_attributes(mode = "0755"),
+    strip_prefix = strip_prefix.from_pkg("bazel-bin"),
+)
+
 pkg_filegroup(
     name = "packaging_files",
     srcs = [
         ":packaging_data_files",
         ":packaging_exe_files",
+        ":language_server",
     ] + [
         ":packaging_link_lld_alias_" + bin_name
         for bin_name in lld_bin_names

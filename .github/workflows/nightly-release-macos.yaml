@@ -62,7 +62,16 @@ jobs:
             --pre_release=nightly --nightly_date=${{ env.nightly_date }} \
             //toolchain/install:prefix_root/bin/carbon \
             //toolchain/install:carbon_toolchain_tar_gz_rule \
-            //toolchain/install:carbon_toolchain_tar_gz_test
+            //toolchain/install:carbon_toolchain_tar_gz_test \
+            //language_server:language_server
+
+      - name: Install npm dependencies
+        working-directory: utils/vscode
+        run: npm install
+
+      - name: Package VS Code extension
+        working-directory: utils/vscode
+        run: npm run package
 
       - name: Extract the release version
         id: extract_release
@@ -91,6 +100,7 @@ jobs:
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos12 }}-macos-amd64.sha256
+            utils/vscode/out/carbon.vsix
 
   build-arm64:
     runs-on: macos-14
@@ -121,7 +131,16 @@ jobs:
             --pre_release=nightly --nightly_date=${{ env.nightly_date }} \
             //toolchain/install:prefix_root/bin/carbon \
             //toolchain/install:carbon_toolchain_tar_gz_rule \
-            //toolchain/install:carbon_toolchain_tar_gz_test
+            //toolchain/install:carbon_toolchain_tar_gz_test \
+            //language_server:language_server
+
+      - name: Install npm dependencies
+        working-directory: utils/vscode
+        run: npm install
+
+      - name: Package VS Code extension
+        working-directory: utils/vscode
+        run: npm run package
 
       - name: Extract the release version
         id: extract_release
@@ -150,6 +169,7 @@ jobs:
           path: |
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.tar.gz
             bazel-bin/toolchain/install/carbon_toolchain-${{ env.release_version_macos14 }}-macos-arm64.sha256
+            utils/vscode/out/carbon.vsix
 
   release:
     runs-on: macos-14
@@ -160,6 +180,11 @@ jobs:
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+      
+      - name: Rename VS Code extension artifacts
+        run: |
+          mv ./artifact-amd64/carbon.vsix ./artifact-amd64/carbon-amd64.vsix
+          mv ./artifact-arm64/carbon.vsix ./artifact-arm64/carbon-arm64.vsix
 
       - name: Create the release
         env:
@@ -167,6 +192,8 @@ jobs:
         run: |
           FILE_AMD64="./artifact-amd64/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
           FILE_ARM64="./artifact-arm64/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
+          VSCODE_EXTENSION_AMD64="./artifact-amd64/carbon-amd64.vsix"
+          VSCODE_EXTENSION_ARM64="./artifact-arm64/carbon-arm64.vsix"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ needs.build-arm64.outputs.release_version_macos14 }}" \
@@ -176,5 +203,7 @@ jobs:
               "${FILE_AMD64}.tar.gz" \
               "${FILE_AMD64}.sha256" \
               "${FILE_ARM64}.tar.gz" \
-              "${FILE_ARM64}.sha256"
+              "${FILE_ARM64}.sha256" \
+              "${VSCODE_EXTENSION_AMD64}" \
+              "${VSCODE_EXTENSION_ARM64}"
           fi
