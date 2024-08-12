@@ -193,10 +193,10 @@ jobs:
       
       - name: Rename VS Code extension artifacts
         run: |
-          mv ./artifact-amd64/carbon.vsix ./artifact-amd64/carbon-amd64.vsix
-          mv ./artifact-amd64/carbon.vsix.sha256 ./artifact-amd64/carbon-amd64.vsix.sha256
-          mv ./artifact-arm64/carbon.vsix ./artifact-arm64/carbon-arm64.vsix
-          mv ./artifact-arm64/carbon.vsix.sha256 ./artifact-arm64/carbon-arm64.vsix.sha256
+          mv ./artifact-amd64/utils/vscode/out/carbon.vsix ./artifact-amd64/utils/vscode/out/carbon-amd64.vsix
+          mv ./artifact-amd64/utils/vscode/out/carbon.vsix.sha256 ./artifact-amd64/utils/vscode/out/carbon-amd64.vsix.sha256
+          mv ./artifact-arm64/utils/vscode/out/carbon.vsix ./artifact-arm64/utils/vscode/out/carbon-arm64.vsix
+          mv ./artifact-arm64/utils/vscode/out/carbon.vsix.sha256 ./artifact-arm64/utils/vscode/out/carbon-arm64.vsix.sha256
 
       - name: Create the release
         env:
@@ -204,8 +204,8 @@ jobs:
         run: |
           FILE_AMD64="./artifact-amd64/carbon_toolchain-${{ needs.build-amd64.outputs.release_version_macos12 }}-macos-amd64"
           FILE_ARM64="./artifact-arm64/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
-          VSCODE_EXTENSION_AMD64="./artifact-amd64/carbon-amd64.vsix"
-          VSCODE_EXTENSION_ARM64="./artifact-arm64/carbon-arm64.vsix"
+          VSCODE_EXTENSION_AMD64="./artifact-amd64/utils/vscode/out/carbon-amd64.vsix"
+          VSCODE_EXTENSION_ARM64="./artifact-arm64/utils/vscode/out/carbon-arm64.vsix"
           if [[ -f "${FILE_AMD64}.tar.gz" ]] && [[ -f "${FILE_AMD64}.sha256" ]] && [[ -f "${FILE_ARM64}.tar.gz" ]] && [[ -f "${FILE_ARM64}.sha256" ]]; then
             gh release create \
               --title "Nightly build ${{ needs.build-arm64.outputs.release_version_macos14 }}" \
