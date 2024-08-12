@@ -33,7 +33,18 @@
         "scopeName": "source.carbon",
         "path": "./carbon.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Language Server Configuration",
+      "properties": {
+        "languageServer.command": {
+          "type": "string",
+          "default": "./bazel-bin/language_server/language_server",
+          "description": "Path to the language server executable"
+        }
+      }
+    }
   },
   "scripts": {
     "package": "mkdir -p out && vsce package -o out/carbon.vsix"

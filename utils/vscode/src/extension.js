@@ -5,9 +5,15 @@
  */
 
 const { LanguageClient } = require('vscode-languageclient/node');
+const vscode = require('vscode');
 
 function activate(context) {
-  const command = './bazel-bin/language_server/language_server';
+  // Get the configuration
+  const config = vscode.workspace.getConfiguration('languageServer');
+  const command = config.get('command', './bazel-bin/language_server/language_server');
+
+  console.log(`Using language server command: ${command}`);
+
   const serverOptions = {
     run: { command },
     debug: { command },
