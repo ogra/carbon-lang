@@ -64,12 +64,24 @@ lld_bin_names = [
     "wasm-ld",
 ]
 
+language_server_bin_names = [
+    "language_server",
+]
+
 [
     binary_alias(
         name = "prefix_root/lib/carbon/llvm/bin/" + bin_name,
         binary = "@llvm-project//lld:lld",
     )
     for bin_name in lld_bin_names
+]
+
+[
+    binary_alias(
+        name = "prefix_root/lib/carbon/language_server/bin/" + bin_name,
+        binary = "//language_server:language_server",
+    )
+    for bin_name in language_server_bin_names
 ]
 
 filegroup(
@@ -83,6 +95,16 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "language_server_data",
+    srcs = [
+        ":install_marker",
+    ] + [
+        "prefix_root/lib/carbon/language_server/bin/" + bin_name
+        for bin_name in language_server_bin_names
+    ],
+)
+
 # All of the install data except for the user-facing binaries. This is typically
 # a reasonable data dependency for libraries and the user-facing binaries
 # without creating a cycle.
@@ -92,6 +114,7 @@ filegroup(
         ":core_data",
         ":install_marker",
         ":llvm_link_data",
+        ":language_server_data",
     ],
 )
 
@@ -106,7 +129,6 @@ filegroup(
         "prefix_root/bin/carbon",
         ":install_lib_data",
         ":install_marker",
-        "//language_server:language_server",
     ],
 )
 
