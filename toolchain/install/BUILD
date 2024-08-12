@@ -57,6 +57,11 @@ binary_alias(
     binary = "@llvm-project//lld:lld",
 )
 
+binary_alias(
+    name = "prefix_root/lib/carbon/language_server/bin/language_server",
+    binary = "//language_server:language_server",
+)
+
 lld_bin_names = [
     "ld.lld",
     "ld64.lld",
@@ -65,7 +70,7 @@ lld_bin_names = [
 ]
 
 language_server_bin_names = [
-    "language_server",
+    # "language_server", # This is already symlinked in the `prefix_root` directory.
 ]
 
 [
@@ -98,10 +103,11 @@ filegroup(
 filegroup(
     name = "language_server_link_data",
     srcs = [
+        "prefix_root/lib/carbon/language_server/bin/language_server",
+        ":install_marker",
+    ] + [
         "prefix_root/lib/carbon/language_server/bin/" + bin_name
         for bin_name in language_server_bin_names
-    ] + [
-        ":install_marker",
     ],
 )
 
