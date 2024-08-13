@@ -206,25 +206,48 @@ jobs:
           FILE_ARM64="./artifact-arm64/carbon_toolchain-${{ needs.build-arm64.outputs.release_version_macos14 }}-macos-arm64"
           VSCODE_EXTENSION_AMD64="./artifact-amd64/utils/vscode/out/carbon-amd64.vsix"
           VSCODE_EXTENSION_ARM64="./artifact-arm64/utils/vscode/out/carbon-arm64.vsix"
-          if [[ -f "${FILE_AMD64}.tar.gz" ]] && \
-             [[ -f "${FILE_AMD64}.sha256" ]] && \
-             [[ -f "${FILE_ARM64}.tar.gz" ]] && \
-             [[ -f "${FILE_ARM64}.sha256" ]] && \
-             [[ -f "${VSCODE_EXTENSION_AMD64}" ]] && \
-             [[ -f "${VSCODE_EXTENSION_AMD64}.sha256" ]] && \
-             [[ -f "${VSCODE_EXTENSION_ARM64}" ]] && \
-             [[ -f "${VSCODE_EXTENSION_ARM64}.sha256" ]]; then
-            gh release create \
-              --title "Nightly build ${{ needs.build-arm64.outputs.release_version_macos14 }}" \
-              --generate-notes \
-              --prerelease \
-              v${{ needs.build-arm64.outputs.release_version_macos14 }} \
-              "${FILE_AMD64}.tar.gz" \
-              "${FILE_AMD64}.sha256" \
-              "${FILE_ARM64}.tar.gz" \
-              "${FILE_ARM64}.sha256" \
-              "${VSCODE_EXTENSION_AMD64}" \
-              "${VSCODE_EXTENSION_AMD64}.sha256" \
-              "${VSCODE_EXTENSION_ARM64}" \
-              "${VSCODE_EXTENSION_ARM64}.sha256"
+          if [[ ! -f "${FILE_AMD64}.tar.gz" ]]; then
+            echo "Missing ${FILE_AMD64}.tar.gz"
+            exit 1
           fi
+          if [[ ! -f "${FILE_AMD64}.sha256" ]]; then
+            echo "Missing ${FILE_AMD64}.sha256"
+            exit 1
+          fi
+          if [[ ! -f "${FILE_ARM64}.tar.gz" ]]; then
+            echo "Missing ${FILE_ARM64}.tar.gz"
+            exit 1
+          fi
+          if [[ ! -f "${FILE_ARM64}.sha256" ]]; then
+            echo "Missing ${FILE_ARM64}.sha256"
+            exit 1
+          fi
+          if [[ ! -f "${VSCODE_EXTENSION_AMD64}" ]]; then
+            echo "Missing ${VSCODE_EXTENSION_AMD64}"
+            exit 1
+          fi
+          if [[ ! -f "${VSCODE_EXTENSION_AMD64}.sha256" ]]; then
+            echo "Missing ${VSCODE_EXTENSION_AMD64}.sha256"
+            exit 1
+          fi
+          if [[ ! -f "${VSCODE_EXTENSION_ARM64}" ]]; then
+            echo "Missing ${VSCODE_EXTENSION_ARM64}"
+            exit 1
+          fi
+          if [[ ! -f "${VSCODE_EXTENSION_ARM64}.sha256" ]]; then
+            echo "Missing ${VSCODE_EXTENSION_ARM64}.sha256"
+            exit 1
+          fi
+          gh release create \
+            --title "Nightly build ${{ needs.build-arm64.outputs.release_version_macos14 }}" \
+            --generate-notes \
+            --prerelease \
+            v${{ needs.build-arm64.outputs.release_version_macos14 }} \
+            "${FILE_AMD64}.tar.gz" \
+            "${FILE_AMD64}.sha256" \
+            "${FILE_ARM64}.tar.gz" \
+            "${FILE_ARM64}.sha256" \
+            "${VSCODE_EXTENSION_AMD64}" \
+            "${VSCODE_EXTENSION_AMD64}.sha256" \
+            "${VSCODE_EXTENSION_ARM64}" \
+            "${VSCODE_EXTENSION_ARM64}.sha256"
