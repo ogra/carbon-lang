@@ -53,6 +53,11 @@ static auto BuildInterfaceDecl(Context& context,
   auto interface_decl_id =
       context.AddPlaceholderInst(SemIR::LocIdAndInst(node_id, interface_decl));
 
+  SemIR::Interface interface_info = {name_context.MakeEntityWithParamsBase(
+      name, interface_decl_id, /*is_extern=*/false)};
+  RequireGenericParams(context, interface_info.implicit_param_refs_id);
+  RequireGenericParams(context, interface_info.param_refs_id);
+
   // Check whether this is a redeclaration.
   auto existing_id = context.decl_name_stack().LookupOrAddName(
       name_context, interface_decl_id, introducer.modifier_set.GetAccessKind());
@@ -103,8 +108,6 @@ static auto BuildInterfaceDecl(Context& context,
     // there was an error in the qualifier, we will have lost track of the
     // interface name here. We should keep track of it even if the name is
     // invalid.
-    SemIR::Interface interface_info = {name_context.MakeEntityWithParamsBase(
-        name, interface_decl_id, /*is_extern=*/false)};
     interface_info.generic_id = FinishGenericDecl(context, interface_decl_id);
     interface_decl.interface_id = context.interfaces().Add(interface_info);
     if (interface_info.has_parameters()) {
@@ -170,10 +173,11 @@ auto HandleParseNode(Context& context,
         {.name_id = SemIR::NameId::SelfType,
          .parent_scope_id = interface_info.scope_id,
          .bind_index = context.scope_stack().AddCompileTimeBinding()});
-    interface_info.self_param_id = context.AddInst<SemIR::BindSymbolicName>(
-        SemIR::LocId::Invalid, {.type_id = self_type_id,
-                                .entity_name_id = entity_name_id,
-                                .value_id = SemIR::InstId::Invalid});
+    interface_info.self_param_id =
+        context.AddInst(SemIR::LocIdAndInst::NoLoc<SemIR::BindSymbolicName>(
+            {.type_id = self_type_id,
+             .entity_name_id = entity_name_id,
+             .value_id = SemIR::InstId::Invalid}));
     context.scope_stack().PushCompileTimeBinding(interface_info.self_param_id);
     context.name_scopes().AddRequiredName(interface_info.scope_id,
                                           SemIR::NameId::SelfType,
