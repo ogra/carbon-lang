@@ -83,7 +83,6 @@ jobs:
           VERSION=$( \
             ./bazel-bin/toolchain/install/prefix_root/bin/carbon version \
             | cut -d' ' -f5 | cut -d'+' -f1,2)
-          echo "::set-output name=release_version_macos12::${VERSION}"
           echo "release_version_macos12=$VERSION" >> $GITHUB_OUTPUT
           echo "release_version_macos12=$VERSION" >> $GITHUB_ENV
       
